@@ -4,6 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev:web": "pnpm --filter @portfolio/web dev",
+    "dev:api": "pnpm --filter @portfolio/api dev",
+    "build:web": "pnpm --filter @portfolio/web build",
+    "build:api": "pnpm --filter @portfolio/api build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint"
   },
