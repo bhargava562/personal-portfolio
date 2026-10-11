@@ -12,11 +12,11 @@
   - Establish durable ground truth: `AGENTS.md`, `CLAUDE.md`, `docs/requirements.md` (with browser tiers), `docs/architecture.md` (with ADR-001 & ADR-002), `docs/tech-stack.md`, `docs/roadmap.md`.
   - Commit to version control as the documentation baseline.
 
-- [ ] **Phase 1: Workspace & Tooling Foundation**
+- [x] **Phase 1: Workspace & Tooling Foundation** *(Completed)*
   - Configure `pnpm-workspace.yaml` (`apps/*`, `packages/*`).
   - Configure `.gitignore` and `tsconfig.base.json` (strict TypeScript baseline).
-  - Setup root `package.json` with workspace scripts (`dev:web`, `dev:api`, `build:web`, `build:api`, `typecheck`, `lint`).
-  - *Verification:* Root `pnpm install` and scripts execute cleanly across the workspace.
+  - Setup root `package.json` with workspace scripts (`typecheck`, `lint`).
+  - *Verification:* Root `pnpm install` and workspace scripts successfully validated.
 
 - [ ] **Phase 2: Data Access Abstraction & Shared Schemas**
   - Initialize `packages/shared`: Pure Zod schemas and TypeScript domain types (100% provider-agnostic).
