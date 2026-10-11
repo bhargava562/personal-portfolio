@@ -1,0 +1,39 @@
+---
+import { getProfile, getProjects } from "@portfolio/data-access";
+
+const profile = await getProfile();
+const projects = await getProjects();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{profile.name} — {profile.role}</title>
+  </head>
+  <body>
+    <header>
+      <h1>{profile.name}</h1>
+      <p>{profile.role}</p>
+      <p>{profile.bio}</p>
+    </header>
+
+    <main>
+      <section>
+        <h2>Featured Projects</h2>
+        <ul>
+          {
+            projects.map((project) => (
+              <li>
+                <strong>{project.title}</strong>
+                <p>{project.description}</p>
+                <small>{project.techStack.join(" • ")}</small>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

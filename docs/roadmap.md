@@ -25,12 +25,11 @@
   - *Verification:* `pnpm -r typecheck` passes cleanly across workspace with zero errors.
 
 - [ ] **Phase 3: Astro Frontend (`apps/web`)**
-  - Initialize Astro static output (`output: "static"`).
-  - Add Preact integration for interactive islands (resume viewer, command palette).
-  - Wire build-time data calls through `@portfolio/data-access` stubs (zero direct DB driver imports per ADR-002).
-  - Implement Vanilla CSS design system with fluid typography and `@media print` stylesheet.
-  - Deploy to Vercel as `apps/web` project (Root Directory: `apps/web`).
-  - *Verification:* Public URL serves static HTML populated with stub data; confirm live before touching Phase 4.
+  - [x] **Step 3a:** Astro scaffold (`output: "static"`), Preact integration, `@portfolio/data-access` stub consumption on homepage, and verified static build output.
+  - [ ] **Step 3b:** Resume page with dedicated layout, content sections, and printable stylesheet (`@media print`).
+  - [ ] **Step 3c:** Interactive Preact islands (resume viewer toolbar with zoom/actions, command palette).
+  - [ ] **Step 3d:** Vercel deployment and live static verification.
+  - *Verification:* `pnpm build:web` produces static HTML with real content; confirmed before Phase 4.
 
 - [ ] **Phase 4: Hono API Backend (`apps/api`)**
   - Initialize Hono application with Vercel Serverless Function adapter (`api/index.ts` handler).
