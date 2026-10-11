@@ -10,5 +10,5 @@ See `AGENTS.md` for architecture rules — they apply here unchanged.
 - **No vendor lock-in:** Keep the repository layer loosely coupled from any single Postgres vendor.
 
 ## Current Status & Checkpoint
-- **Completed:** Phase 0 (Docs/Skeleton), Phase 1 (Workspace/Tooling), Phase 2 (Shared schemas & stubbed data-access), Step 3a (Astro scaffold + stubbed homepage + verified static build).
-- **Active / Next:** Step 3b — Resume page & printable stylesheet (`@media print`).
+- **Completed:** Phase 0 (Docs/Skeleton), Phase 1 (Workspace/Tooling), Phase 2 (Shared schemas & stubbed data-access), Step 3a (Astro scaffold & homepage), Step 3b (Resume page & printable stylesheet).
+- **Active / Next:** Step 3c — Interactive Preact island (Resume viewer toolbar with zoom/actions) & Step 3d (Vercel deployment).

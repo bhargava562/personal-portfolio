@@ -26,7 +26,7 @@
 
 - [ ] **Phase 3: Astro Frontend (`apps/web`)**
   - [x] **Step 3a:** Astro scaffold (`output: "static"`), Preact integration, `@portfolio/data-access` stub consumption on homepage, and verified static build output.
-  - [ ] **Step 3b:** Resume page with dedicated layout, content sections, and printable stylesheet (`@media print`).
+  - [x] **Step 3b:** Resume page (`/resume`) with dedicated layout, content sections, and printable stylesheet (`@media print`), verified static build (`dist/resume/index.html`).
   - [ ] **Step 3c:** Interactive Preact islands (resume viewer toolbar with zoom/actions, command palette).
   - [ ] **Step 3d:** Vercel deployment and live static verification.
   - *Verification:* `pnpm build:web` produces static HTML with real content; confirmed before Phase 4.

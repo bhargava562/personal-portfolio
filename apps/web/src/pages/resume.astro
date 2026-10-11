@@ -1,0 +1,125 @@
+---
+import { getResumeData } from "@portfolio/data-access";
+import "../styles/resume.css";
+
+const resume = await getResumeData();
+const { profile, skills, experiences, educations, featuredProjects } = resume;
+
+// Group skills by category for neat presentation
+const categories = ["Frontend", "Backend", "Database", "DevOps", "Architecture", "Tools"] as const;
+const skillsByCategory = categories
+  .map((category) => ({
+    category,
+    skills: skills.filter((s) => s.category === category),
+  }))
+  .filter((group) => group.skills.length > 0);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={`Resume of ${profile.name} — ${profile.role}`} />
+    <title>{profile.name} — Resume</title>
+  </head>
+  <body class="resume-body">
+    <!-- Screen navigation and print trigger (hidden on print) -->
+    <nav class="no-print resume-nav-bar" aria-label="Resume toolbar">
+      <a href="/">← Back to Portfolio</a>
+      <button type="button" class="print-button" onclick="window.print()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        Print / Save as PDF
+      </button>
+    </nav>
+
+    <!-- Printable Resume Sheet -->
+    <main class="resume-paper">
+      <!-- Profile Header -->
+      <header class="resume-header">
+        <h1 class="resume-title">{profile.name}</h1>
+        <p class="resume-role">{profile.role}</p>
+        <p class="resume-bio">{profile.headline}</p>
+
+        <div class="resume-contact">
+          <span>{profile.location}</span>
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+          <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </header>
+
+      <!-- Experience Section -->
+      {experiences.length > 0 && (
+        <section class="resume-section">
+          <h2 class="section-title">Experience</h2>
+          {experiences.map((exp) => (
+            <article class="experience-item">
+              <div class="item-header">
+                <div>
+                  <span class="item-role">{exp.role}</span> — <span class="item-company">{exp.company}</span>
+                </div>
+                <time class="item-date">{exp.startDate} – {exp.current ? "Present" : exp.endDate}</time>
+              </div>
+              <ul class="item-points">
+                {exp.points.map((pt) => <li>{pt}</li>)}
+              </ul>
+            </article>
+          ))}
+        </section>
+      )}
+
+      <!-- Featured Projects Section -->
+      {featuredProjects.length > 0 && (
+        <section class="resume-section">
+          <h2 class="section-title">Key Projects</h2>
+          {featuredProjects.map((project) => (
+            <article class="project-item">
+              <div class="project-title">{project.title}</div>
+              <p class="project-desc">{project.description}</p>
+              <div class="project-tech">Tech: {project.techStack.join(", ")}</div>
+            </article>
+          ))}
+        </section>
+      )}
+
+      <!-- Skills Section -->
+      {skillsByCategory.length > 0 && (
+        <section class="resume-section">
+          <h2 class="section-title">Technical Skills</h2>
+          <div class="skills-categories">
+            {skillsByCategory.map((group) => (
+              <div class="skill-category-group">
+                <div class="skill-category-title">{group.category}</div>
+                <div class="skill-chips">
+                  {group.skills.map((skill) => (
+                    <span class="skill-chip">{skill.name}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Education Section -->
+      {educations.length > 0 && (
+        <section class="resume-section">
+          <h2 class="section-title">Education</h2>
+          {educations.map((edu) => (
+            <div class="education-item">
+              <div>
+                <span class="education-title">{edu.degree}</span> — <span class="education-school">{edu.institution}</span>
+              </div>
+              <span class="education-date">{edu.startYear} – {edu.endYear || "Present"}</span>
+            </div>
+          ))}
+        </section>
+      )}
+    </main>
+  </body>
+</html>

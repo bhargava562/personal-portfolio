@@ -24,8 +24,8 @@
 - Check `docs/roadmap.md` for current phase — do not implement a later phase early.
 
 ## Current Status & Checkpoint
-- **Completed:** Phase 0 (Docs/Skeleton), Phase 1 (Workspace/Tooling), Phase 2 (Shared schemas & stubbed data-access), Step 3a (Astro scaffold + stubbed homepage + verified static build).
-- **Active / Next:** Step 3b — Resume page & printable stylesheet (`@media print`).
+- **Completed:** Phase 0 (Docs/Skeleton), Phase 1 (Workspace/Tooling), Phase 2 (Shared schemas & stubbed data-access), Step 3a (Astro scaffold & homepage), Step 3b (Resume page & printable stylesheet).
+- **Active / Next:** Step 3c — Interactive Preact island (Resume viewer toolbar with zoom/actions) & Step 3d (Vercel deployment).
 
 ## Source of truth
 - This repository's `docs/` folder is authoritative over any prior chat explanation.
