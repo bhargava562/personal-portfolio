@@ -1,0 +1,17 @@
+{
+  "name": "@portfolio/data-access",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@portfolio/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.49.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

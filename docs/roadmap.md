@@ -18,11 +18,11 @@
   - Setup root `package.json` with workspace scripts (`dev:web`, `dev:api`, `build:web`, `build:api`, `typecheck`, `lint`).
   - *Verification:* Root `pnpm install` and workspace scripts successfully validated.
 
-- [ ] **Phase 2: Shared Schemas & Stubbed Data-Access**
+- [x] **Phase 2: Shared Schemas & Stubbed Data-Access** *(Completed)*
   - Initialize `packages/shared`: Pure Zod schemas and TypeScript domain types (100% provider-agnostic). Point `main`/`types` to `./src/index.ts`.
   - Initialize `packages/data-access`: Repository layer with STUBBED data functions matching Zod types (`getProjects`, `getProfile`, `getResumeData`, `recordPageView`).
-  - Ensure packages extend `tsconfig.base.json`.
-  - *Verification:* `pnpm -r typecheck` passes cleanly across workspace (no separate build step needed; Vite/Vercel consume TS directly).
+  - Packages extend `tsconfig.base.json`.
+  - *Verification:* `pnpm -r typecheck` passes cleanly across workspace with zero errors.
 
 - [ ] **Phase 3: Astro Frontend (`apps/web`)**
   - Initialize Astro static output (`output: "static"`).

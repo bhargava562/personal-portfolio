@@ -9,7 +9,7 @@
     "build:web": "pnpm --filter @portfolio/web build",
     "build:api": "pnpm --filter @portfolio/api build",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r --if-present lint"
   },
   "keywords": [],
   "author": "",
@@ -22,5 +22,8 @@
     }
   },
   "packageManager": "pnpm@12.9.1",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
 }

@@ -23,5 +23,9 @@
 - Read `docs/architecture.md` and `docs/tech-stack.md` first.
 - Check `docs/roadmap.md` for current phase — do not implement a later phase early.
 
+## Current Status & Checkpoint
+- **Completed:** Phase 0 (Docs/Skeleton), Phase 1 (Workspace/Tooling), Phase 2 (Shared schemas & stubbed data-access).
+- **Active / Next:** Phase 3 — `apps/web` (Astro static frontend consuming `@portfolio/data-access` stubs).
+
 ## Source of truth
 - This repository's `docs/` folder is authoritative over any prior chat explanation.
