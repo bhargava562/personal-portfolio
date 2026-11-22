@@ -6,6 +6,9 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   adapter: cloudflare(),
   integrations: [preact()],
+  devToolbar: {
+    enabled: false,
+  },
   security: {
     checkOrigin: true,
   },
