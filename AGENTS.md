@@ -21,9 +21,22 @@
    Review `docs/requirements.md` browser support policy before choosing any CSS or JS feature. Plain CSS with semantic HTML must render all core content even with JavaScript disabled.
 8. **No All-at-Once Scaffolding:**
    Follow `docs/roadmap.md` strictly in sequential phases. Complete and verify each phase before moving to the next.
+9. **Supabase Strict Security Baseline (Late 2026 Guidance):**
+   - **Default-Deny RLS on Every Table:** Every table created in `public` must have Row Level Security enabled (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`) with zero public policies. This default-deny firewall completely blocks public access via the Data API, while allowing the Hono sync worker using the dedicated Secret Key (`sb_secret_...`) to read/sync safely.
+   - **Revoke Public Grants:** Explicitly revoke default table grants from client roles: `REVOKE ALL ON TABLE ... FROM anon, authenticated;`.
+   - **API Key Hygiene:** Use the dedicated Secret Key (`sb_secret_...`) strictly server-side in `apps/api/.dev.vars` (local) and via `wrangler secret put SUPABASE_SECRET_KEY` (production). Never place it in `apps/web` or any client/public environment variable.
+   - **RLS Audit Verification:** Verify RLS coverage with:
+     `SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname = 'public' AND rowsecurity = false;` (must return 0 rows).
+   - **Storage & Webhook Security:** Storage buckets default to private (with explicit RLS). Database webhooks to Hono must include `Authorization: Bearer <SYNC_SECRET>`.
+   - **Reproducible Migrations:** All schema changes must be committed as version-controlled `.sql` files in `supabase/migrations/`.
+10. **Ports & Adapters (Hexagonal Architecture) & SOLID DIP:**
+    - High-level domain services (`apps/api/src/services/sync.service.ts`) and routes must depend only on TypeScript interfaces/ports (`PortfolioRepository`, `CacheStore`) defined in `packages/data-access/src/ports/`.
+    - Only concrete adapters (`packages/data-access/src/adapters/`) may import `@supabase/supabase-js` or Cloudflare KV bindings.
+    - Database column names (`snake_case`) must be transformed into clean domain types (`camelCase`) inside the adapter.
+    - Application entry points (`apps/api/src/container.ts`) wire concrete adapters via lightweight constructor injection.
 
 ## Before making changes
-- Read `docs/architecture.md`, `docs/adr/001-cloudflare-workers-and-kv.md`, and `docs/tech-stack.md` first.
+- Read `docs/architecture.md`, `docs/adr/001-cloudflare-workers-and-kv.md`, `docs/adr/002-supabase-database-connection.md`, `docs/architecture/ports-and-adapters.md`, and `docs/tech-stack.md` first.
 - Check `docs/roadmap.md` for current phase — do not implement a later phase early.
 
 ## Current Status & Checkpoint
@@ -31,12 +44,13 @@
   - Phase 0: Repo Skeleton & Authoritative Documentation.
   - Phase 1: Documentation Alignment & ADR-001 (Cloudflare Workers + KV architecture realigned; all Vercel references removed; ADR-001 authored).
   - Phase 2: Shared schemas (`packages/shared`) & stubbed data-access (`packages/data-access`).
-  - Phase 3: Astro frontend (`apps/web`) configured for Cloudflare Workers with `@astrojs/cloudflare` adapter, `wrangler.jsonc` (`PORTFOLIO_KV` binding), homepage reading from repository layer, and verified production builds.
+  - Phase 3: Astro frontend (`apps/web`) configured for Cloudflare Workers with `@astrojs/cloudflare` adapter, `wrangler.jsonc` (`PORTFOLIO_KV` binding), intentional architectural frontend design, and verified production builds.
   - Phase 4: Hono Sync Backend (`apps/api`) scaffolded with Cloudflare Workers types, `wrangler.jsonc`, `PORTFOLIO_KV` bindings, health/sync endpoints, and verified typechecking.
   - Phase 6: Dependency Inspection & LTS Alignment (Node >=26 engines, pnpm 12.21.0, CI Node 26, TypeScript standardized to 7.0.2 across all packages, upgraded wrangler, hono, and patched sub-dependencies via workspace overrides).
   - Phase 7: Baseline Security Hardening (Global secureHeaders, CSRF, and CORS origin allowlists on `apps/api`; `POST /sync` secret authentication; Astro `security: { checkOrigin: true }`; dynamic URL validation and dangerous scheme rejection).
   - Code Review & Remediation (CodeRabbit): Fixed CORS/CSRF domain suffix bypass vulnerability, added constant-time `timingSafeEqual` via Web Crypto on `POST /sync`, patched protocol-relative URL bypass in `sanitizeUrl`, added `pnpm build` to CI workflow, and migrated inline event listener to script block for strict CSP compatibility.
-- **Active / Next:** Phase 5 — Postgres Database (Supabase) Schema & Real Data-Access Integration, followed by Phase 6 (Automated Content Sync Pipeline via `PORTFOLIO_KV`).
+  - Supabase Foundations & ADR-002: Established connection configuration via `.env`, `.env.example`, `apps/api/.dev.vars`, `apps/api/.dev.vars.example` (with strict `.gitignore` rules); authored ADR-002 (`docs/adr/002-supabase-database-connection.md`) and Ports & Adapters guide (`docs/architecture/ports-and-adapters.md`); verified live connection to `personal-portfolio` (`eqwajpmzlpnwyuegcykc`, `ACTIVE_HEALTHY`) via Supabase MCP; initialized `supabase/migrations/`.
+- **Active / Next:** Phase 5 — Awaiting user command on database ERD schema before authoring migration SQL files and implementing repository adapters.
 
 ## Source of truth
 - This repository's `docs/` folder is authoritative over any prior chat explanation.

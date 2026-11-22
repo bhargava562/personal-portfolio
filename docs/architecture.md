@@ -88,6 +88,11 @@ apps/web on Cloudflare Workers reads PORTFOLIO_KV on request
 New content live instantly at the edge
 ```
 
+## Related Documentation & ADRs
+- [ADR-001: Cloudflare Workers and Workers KV](docs/adr/001-cloudflare-workers-and-kv.md)
+- [ADR-002: Supabase Database Connection Method & Security Architecture](docs/adr/002-supabase-database-connection.md)
+- [Architectural Pattern: Ports and Adapters (Hexagonal Architecture)](docs/architecture/ports-and-adapters.md)
+
 ## Options Considered
 
 ### Option A: SSR with Direct Database Queries
