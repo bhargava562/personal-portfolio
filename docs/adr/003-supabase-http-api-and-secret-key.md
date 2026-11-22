@@ -1,4 +1,4 @@
-# ADR-002: Supabase Database Connection Method & Security Architecture
+# ADR-003: Supabase HTTP API and Secret Key for Private Edge Sync
 
 **Status:** Accepted  
 **Date:** 2026-11-22  
@@ -8,7 +8,7 @@
 
 ## 1. Context
 
-In the personal portfolio monorepo architecture established by ADR-001, the system separates content authoring from content consumption:
+In the personal portfolio monorepo architecture established by ADR-001 and ADR-002, the system separates content authoring from content consumption:
 1. **Source of Truth:** PostgreSQL hosted on Supabase, edited by the portfolio owner.
 2. **Synchronization Service (`apps/api`):** Hono running on Cloudflare Workers, triggered by database webhooks on content changes.
 3. **Edge Cache:** Cloudflare Workers KV (`PORTFOLIO_KV`), holding pre-built metadata JSON.

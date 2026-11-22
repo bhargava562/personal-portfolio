@@ -1,4 +1,4 @@
-# ADR-001: Cloudflare Workers and Workers KV for Edge Hosting & Content Sync
+# ADR-002: Cloudflare Workers and Workers KV for Edge Hosting & Content Sync
 
 **Status:** Accepted  
 **Date:** 2026-11-22  
@@ -10,7 +10,7 @@ The portfolio requires:
 2. **Instant Content Updates:** When content is added or updated in PostgreSQL (Supabase), the live site should reflect changes immediately without requiring manual code commits, dashboard redeployments, or lengthy 30–60 second CI/CD full rebuild cycles.
 3. **Free-Tier Sustainability & Unified Architecture:** Hosting and compute should run strictly within generous free tiers without vendor fragmentation across multiple platforms.
 
-Previously, ADR-001 proposed using Vercel Deploy Hooks to trigger full Astro static site rebuilds (~30–60s) on every database change. While this achieved zero database queries per visitor, it consumed build minutes, incurred build latency, and relied on Vercel deployment infrastructure.
+Previously, an earlier proposal used Vercel Deploy Hooks to trigger full Astro static site rebuilds (~30–60s) on every database change. While this achieved zero database queries per visitor, it consumed build minutes, incurred build latency, and relied on Vercel deployment infrastructure.
 
 ## Decision
 Migrate hosting and edge infrastructure exclusively to **Cloudflare Workers** using **Cloudflare Workers KV**:
@@ -71,7 +71,7 @@ Migrate hosting and edge infrastructure exclusively to **Cloudflare Workers** us
 
 ## Options Considered
 
-### Option A: Vercel Deploy Hook & Full Rebuilds (Superseded ADR-001)
+### Option A: Vercel Deploy Hook & Full Rebuilds
 - **Trade-off:** Triggering a full rebuild via Vercel Deploy Hook takes 30–60 seconds, burns Vercel monthly build minutes, and fragments hosting across platforms.
 - **Verdict:** Superseded by Cloudflare Workers KV.
 

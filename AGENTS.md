@@ -3,17 +3,17 @@
 ## Non-negotiable architecture rules
 
 1. **Deployment Platform (Cloudflare Workers ONLY):**
-   Deployments target Cloudflare Workers exclusively via Wrangler. No Vercel or other hosting platforms are used.
+   Deployments target Cloudflare Workers exclusively via Wrangler. No Vercel or other hosting platforms are used (ADR-002).
 2. **Monorepo Structure & Separation of Concerns:**
-   - `apps/web`: Astro frontend deployed to Cloudflare Workers (`@astrojs/cloudflare`), reading pre-built metadata JSON directly from `PORTFOLIO_KV`.
-   - `apps/api`: Hono backend deployed to Cloudflare Workers, acting as an edge sync service from Supabase to KV, plus tokenized links and view analytics.
-   - `packages/data-access`: Dedicated repository layer. The ONLY package permitted to import `@supabase/supabase-js` or any direct database driver.
-   - `packages/shared`: Pure, provider-agnostic Zod schemas and TypeScript domain types.
-3. **Database Access Abstraction (ADR-002):**
+   - `apps/web`: Astro frontend deployed to Cloudflare Workers (`@astrojs/cloudflare`), reading pre-built metadata JSON directly from `PORTFOLIO_KV` (ADR-001 & ADR-002).
+   - `apps/api`: Hono backend deployed to Cloudflare Workers, acting as an edge sync service from Supabase to KV, plus tokenized links and view analytics (ADR-001, ADR-002, ADR-003).
+   - `packages/data-access`: Dedicated repository layer. The ONLY package permitted to import `@supabase/supabase-js` or any direct database driver (ADR-004).
+   - `packages/shared`: Pure, provider-agnostic Zod schemas and TypeScript domain types (ADR-004).
+3. **Database Access Abstraction (ADR-004):**
    Only `packages/data-access` may import `@supabase/supabase-js` or database drivers. `apps/web` and `apps/api` must call repository functions exported by `@portfolio/data-access`. The app layer must remain completely decoupled from any specific database vendor.
-4. **Zero DB Reads Per Visitor (ADR-001):**
+4. **Zero DB Reads Per Visitor (ADR-002):**
    `apps/web` reads metadata JSON directly from the shared Cloudflare Workers KV binding (`PORTFOLIO_KV`). Visiting the website costs 0 database queries. Never introduce per-request database calls to PostgreSQL for page visitors.
-5. **Automated Content Sync Pipeline (ADR-001):**
+5. **Automated Content Sync Pipeline (ADR-002 & ADR-003):**
    Content updates happen via database change trigger/webhook $\rightarrow$ `apps/api` (Hono on Cloudflare Workers) $\rightarrow$ updates `PORTFOLIO_KV`. Never build a "redeploy manually to update content" workflow.
 6. **No Over-Engineered Caching Layers:**
    Do not introduce Redis, Debezium CDC, or complex edge-cache-tag infrastructure unless a new ADR justifies it against real traffic metrics. Cloudflare Workers KV (`PORTFOLIO_KV`) serves as the edge store.
@@ -36,20 +36,20 @@
     - Application entry points (`apps/api/src/container.ts`) wire concrete adapters via lightweight constructor injection.
 
 ## Before making changes
-- Read `docs/architecture.md`, `docs/adr/001-cloudflare-workers-and-kv.md`, `docs/adr/002-supabase-database-connection.md`, `docs/architecture/ports-and-adapters.md`, and `docs/tech-stack.md` first.
+- Read `docs/architecture.md`, `docs/adr/001-astro-and-hono-stack.md`, `docs/adr/002-cloudflare-workers-and-kv.md`, `docs/adr/003-supabase-http-api-and-secret-key.md`, `docs/adr/004-ports-and-adapters-data-access.md`, and `docs/tech-stack.md` first.
 - Check `docs/roadmap.md` for current phase — do not implement a later phase early.
 
 ## Current Status & Checkpoint
 - **Completed:**
   - Phase 0: Repo Skeleton & Authoritative Documentation.
-  - Phase 1: Documentation Alignment & ADR-001 (Cloudflare Workers + KV architecture realigned; all Vercel references removed; ADR-001 authored).
+  - Phase 1: Documentation Alignment & ADR Suite (`001-astro-and-hono-stack.md`, `002-cloudflare-workers-and-kv.md`, `003-supabase-http-api-and-secret-key.md`, `004-ports-and-adapters-data-access.md`).
   - Phase 2: Shared schemas (`packages/shared`) & stubbed data-access (`packages/data-access`).
   - Phase 3: Astro frontend (`apps/web`) configured for Cloudflare Workers with `@astrojs/cloudflare` adapter, `wrangler.jsonc` (`PORTFOLIO_KV` binding), intentional architectural frontend design, and verified production builds.
   - Phase 4: Hono Sync Backend (`apps/api`) scaffolded with Cloudflare Workers types, `wrangler.jsonc`, `PORTFOLIO_KV` bindings, health/sync endpoints, and verified typechecking.
   - Phase 6: Dependency Inspection & LTS Alignment (Node >=26 engines, pnpm 12.21.0, CI Node 26, TypeScript standardized to 7.0.2 across all packages, upgraded wrangler, hono, and patched sub-dependencies via workspace overrides).
   - Phase 7: Baseline Security Hardening (Global secureHeaders, CSRF, and CORS origin allowlists on `apps/api`; `POST /sync` secret authentication; Astro `security: { checkOrigin: true }`; dynamic URL validation and dangerous scheme rejection).
   - Code Review & Remediation (CodeRabbit): Fixed CORS/CSRF domain suffix bypass vulnerability, added constant-time `timingSafeEqual` via Web Crypto on `POST /sync`, patched protocol-relative URL bypass in `sanitizeUrl`, added `pnpm build` to CI workflow, and migrated inline event listener to script block for strict CSP compatibility.
-  - Supabase Foundations & ADR-002: Established connection configuration via `.env`, `.env.example`, `apps/api/.dev.vars`, `apps/api/.dev.vars.example` (with strict `.gitignore` rules); authored ADR-002 (`docs/adr/002-supabase-database-connection.md`) and Ports & Adapters guide (`docs/architecture/ports-and-adapters.md`); verified live connection to `personal-portfolio` (`eqwajpmzlpnwyuegcykc`, `ACTIVE_HEALTHY`) via Supabase MCP; initialized `supabase/migrations/`.
+  - Supabase Foundations & ADRs: Established connection configuration via `.env`, `.env.example`, `apps/api/.dev.vars`, `apps/api/.dev.vars.example` (with strict `.gitignore` rules); authored ADRs `001` through `004` and Ports & Adapters guide; verified live connection to `personal-portfolio` (`eqwajpmzlpnwyuegcykc`, `ACTIVE_HEALTHY`) via Supabase MCP; initialized `supabase/migrations/`.
 - **Active / Next:** Phase 5 — Awaiting user command on database ERD schema before authoring migration SQL files and implementing repository adapters.
 
 ## Source of truth

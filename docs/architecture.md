@@ -88,10 +88,12 @@ apps/web on Cloudflare Workers reads PORTFOLIO_KV on request
 New content live instantly at the edge
 ```
 
-## Related Documentation & ADRs
-- [ADR-001: Cloudflare Workers and Workers KV](docs/adr/001-cloudflare-workers-and-kv.md)
-- [ADR-002: Supabase Database Connection Method & Security Architecture](docs/adr/002-supabase-database-connection.md)
-- [Architectural Pattern: Ports and Adapters (Hexagonal Architecture)](docs/architecture/ports-and-adapters.md)
+## Architectural Decision Records (ADRs)
+- [ADR-001: Choose Astro (Frontend) and Hono (Backend) Over Other JS Frameworks](adr/001-astro-and-hono-stack.md)
+- [ADR-002: Cloudflare Workers and Workers KV for Edge Hosting & Content Sync](adr/002-cloudflare-workers-and-kv.md)
+- [ADR-003: Supabase HTTP API and Secret Key for Private Edge Sync](adr/003-supabase-http-api-and-secret-key.md)
+- [ADR-004: Ports and Adapters (Hexagonal Architecture) for Loose Coupling](adr/004-ports-and-adapters-data-access.md)
+- [Architectural Pattern Guide: Ports and Adapters](architecture/ports-and-adapters.md)
 
 ## Options Considered
 
@@ -110,7 +112,7 @@ New content live instantly at the edge
 
 ---
 
-# ADR-002: Database Access Abstraction (Preventing Vendor Lock-in)
+# Database Access Abstraction (Preventing Vendor Lock-in — See ADR-004)
 
 **Status:** Accepted  
 **Date:** 2026-10-11  
