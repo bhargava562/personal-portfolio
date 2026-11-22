@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": ">=26.0.0"
+  },
   "scripts": {
+    "dev": "pnpm --parallel --filter ./apps/* dev",
     "dev:web": "pnpm --filter @portfolio/web dev",
     "dev:api": "pnpm --filter @portfolio/api dev",
+    "build": "pnpm -r build",
     "build:web": "pnpm --filter @portfolio/web build",
     "build:api": "pnpm --filter @portfolio/api build",
     "typecheck": "pnpm -r typecheck",
@@ -17,11 +22,11 @@
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "12.9.1",
+      "version": "12.21.0",
       "onFail": "download"
     }
   },
-  "packageManager": "pnpm@12.9.1",
+  "packageManager": "pnpm@12.21.0",
   "type": "module",
   "devDependencies": {
     "typescript": "^7.0.2"

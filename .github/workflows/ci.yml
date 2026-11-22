@@ -8,7 +8,7 @@ on:
 
 jobs:
   validate:
-    name: Typecheck & Lint Checks
+    name: Build, Typecheck & Lint Checks
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 26
           cache: "pnpm"
 
       - name: Install Dependencies
@@ -31,6 +31,9 @@ jobs:
 
       - name: Typecheck Workspace
         run: pnpm typecheck
+
+      - name: Build Workspace
+        run: pnpm build
 
       - name: Lint Workspace
         run: pnpm lint

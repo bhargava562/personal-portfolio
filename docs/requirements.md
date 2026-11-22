@@ -5,33 +5,34 @@
 - **Portfolio Content Sync:**
   - Content updates happen by inserting or updating rows in Postgres.
   - No manual code changes, commits, or dashboard redeployments required.
-  - Automatically rebuilds and publishes static content within 60 seconds (ADR-001).
+  - Supabase database change trigger/webhook invokes Hono sync service on Cloudflare Workers $\rightarrow$ updates `PORTFOLIO_KV` pre-built metadata JSON immediately without waiting for full site rebuilds (ADR-001).
 - **Interactive & Printable Resume:**
-  - Synchronized from the same single source of truth in Postgres.
+  - Synchronized from the same single source of truth in Postgres (via `PORTFOLIO_KV`).
   - In-browser interactive viewer with zoom and section jumping (Preact island).
   - High-fidelity printable view (`@media print`) and downloadable PDF (`Bhargava_Resume.pdf`).
 - **Tokenized Resume Links:**
   - Time-limited or view-capped personalized links for recruiters and hiring managers.
-  - Anonymous view analytics (referrer, device type, access timestamp) via Hono API.
+  - Anonymous view analytics (referrer, device type, access timestamp) via Hono API on Cloudflare Workers.
 
 ---
 
 ## 2. Non-Functional Requirements
 
-- **Static-First & Zero DB Reads Per Visitor:**
-  - 100% static HTML served from edge CDN.
+- **Edge Performance & Zero DB Reads Per Visitor:**
+  - Edge-rendered / static HTML served from Cloudflare Workers.
+  - Metadata read directly from Cloudflare Workers KV (`PORTFOLIO_KV`) at the edge.
   - Visiting the site generates 0 database queries.
 - **Fast Load & Performance Budget:**
   - Sub-second FCP and LCP across global regions.
   - Lighthouse audit budget: 95+ score across Performance, Accessibility, Best Practices, and SEO.
 - **Free-Tier Hosting Only:**
-  - Completely operable within free tiers (Vercel, Supabase/Postgres, GitHub Actions).
+  - Completely operable within free tiers (Cloudflare Workers, Cloudflare Workers KV, Supabase/Postgres, GitHub Actions).
   - Resilient to sleeping databases: site never goes down if the database is paused.
 - **No Database Vendor Lock-In (ADR-002):**
   - Loose coupling: `packages/data-access` encapsulates the database driver.
   - Seamless migration path to Neon or standard PostgreSQL without touching `apps/web` or `apps/api`.
 - **Zero Redundant Infrastructure:**
-  - No Redis, no CDC pipelines, no complex caching invalidation layers. The static CDN serves as the cache.
+  - No Redis, no CDC pipelines, no complex edge-cache-tag infrastructure. Cloudflare Workers KV serves as the edge store.
 
 ---
 

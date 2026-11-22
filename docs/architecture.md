@@ -3,36 +3,36 @@
 ## Target Architecture
 
 ```
-                                  [Content Updates (Table Editor / SQL / CMS)]
+                                  [Content Updates (Supabase / SQL / CMS)]
                                                        │
                                                        ▼
                                           ┌────────────────────────┐
                                           │   PostgreSQL Database  │
-                                          │ (Supabase, Neon, etc.) │
+                                          │       (Supabase)       │
                                           └────────────┬───────────┘
                                                        │ DB Change Trigger / Webhook
                                                        ▼
-                                          ┌────────────────────────┐
-                                          │   Vercel Deploy Hook   │
-                                          └────────────┬───────────┘
-                                                       │ Triggers Rebuild (~30-60s)
-                                                       ▼
-┌─────────────────────────────────┐       ┌────────────────────────┐
-│     End User (Any Browser)      │──────▶│ apps/web (Astro CDN)   │
-│  - Static HTML + Plain CSS      │       │ - Static Output        │
-│  - Zero DB queries per visit    │       │ - Calls data-access    │
-│  - Islands (Preact) only for UI │       │   at build time        │
-└────────────────┬────────────────┘       └────────────┬───────────┘
-                 │ Dynamic interactions                │
-                 ▼                                     │
-      ┌───────────────────────┐                        │
-      │   apps/api (Hono)     │                        │
-      │  - Vercel Serverless  │                        │
-      │  - Tokenized links    │                        │
-      │  - View analytics     │                        │
-      └──────────┬────────────┘                        │
-                 │                                     │
-                 ▼                                     ▼
+ ┌─────────────────────────────────────────────────────────────────────────┐
+ │                    Cloudflare Workers Edge Network                      │
+ │                                                                         │
+ │   ┌────────────────────────┐          Writes        ┌───────────────┐   │
+ │   │    apps/api (Hono)     │───────────────────────▶│  Workers KV   │   │
+ │   │  - Sync Service        │                        │(PORTFOLIO_KV) │   │
+ │   │  - Tokenized links     │                        │- Pre-built    │   │
+ │   │  - View analytics      │                        │  metadata JSON│   │
+ │   └──────────┬─────────────┘                        └───────┬───────┘   │
+ │              │                                              │           │
+ │              │ Dynamic interactions                         │ Reads     │
+ │              ▼                                              ▼           │
+ │   ┌─────────────────────────────────┐        ┌──────────────────────┐   │
+ │   │     End User (Any Browser)      │───────▶│   apps/web (Astro)   │   │
+ │   │  - Semantic HTML + Plain CSS    │        │ - @astrojs/cloudflare│   │
+ │   │  - Zero DB queries per visit    │        │ - Direct KV reads    │   │
+ │   │  - Islands (Preact) only for UI │        │ - Sub-ms edge cache  │   │
+ │   └─────────────────────────────────┘        └──────────────────────┘   │
+ └─────────────────────────────────────┬───────────────────────────────────┘
+                                       │
+                                       ▼
       ┌────────────────────────────────────────────────────────────┐
       │                   packages/data-access                     │
       │  - Sole place importing database driver / client library   │
@@ -50,19 +50,24 @@
 
 ---
 
-# ADR-001: Content Update Mechanism for Static Portfolio
+# ADR-001: Cloudflare Workers and Workers KV for Edge Hosting & Content Sync
+
+> Full ADR document: [`docs/adr/001-cloudflare-workers-and-kv.md`](./adr/001-cloudflare-workers-and-kv.md)
 
 **Status:** Accepted  
-**Date:** 2026-10-11  
+**Date:** 2026-11-22  
 **Deciders:** Bhargava A  
 
 ## Context
-The stack chosen (Astro static output, Hono API, Postgres) was selected for cross-browser resilience, minimal-JS execution, and instant page loads. A core requirement is: **inserting or updating a row in Postgres must update the live portfolio without code commits or manual redeployments.**
+The stack chosen (Astro, Hono API, Postgres) was selected for cross-browser resilience, minimal-JS execution, and instant page loads. A core requirement is: **inserting or updating a row in Postgres must update the live portfolio without code commits, manual redeployments, or long full-rebuild cycles, while maintaining zero per-visitor database queries.**
 
-Astro's `output: "static"` reads the database only at build time. To keep the static guarantee without per-visitor database round-trips, builds must be triggered automatically whenever content changes.
+Earlier designs relied on Vercel Deploy Hooks triggering static site rebuilds (~30–60s). This consumed Vercel build minutes and incurred rebuild latency on every content edit.
 
 ## Decision
-Keep Astro static output (avoid SSR per-request database hits). Trigger a rebuild via a database webhook/trigger that sends an HTTP POST request to a Vercel Deploy Hook URL.
+Deploy exclusively to **Cloudflare Workers** using **Cloudflare Workers KV** (`PORTFOLIO_KV`) as the edge caching and pre-built metadata layer:
+1. `apps/web` runs on Cloudflare Workers via `@astrojs/cloudflare`. It reads metadata JSON directly from `PORTFOLIO_KV` bindings with sub-millisecond edge latency, achieving zero database queries per visitor.
+2. `apps/api` runs on Cloudflare Workers using Hono as an edge sync service. Supabase database change triggers/webhooks hit `apps/api`, which updates the pre-built metadata JSON stored in `PORTFOLIO_KV`.
+3. Visiting the portfolio incurs 0 database queries, protecting free-tier Postgres instances from sleeping or connection exhaustion.
 
 ```
 INSERT INTO projects (...)
@@ -71,29 +76,32 @@ INSERT INTO projects (...)
 Postgres Webhook / Trigger (fires on INSERT/UPDATE)
         │  HTTP POST
         ▼
-Vercel Deploy Hook URL (no code, no secrets exposed)
+apps/api on Cloudflare Workers (Hono sync endpoint)
         │
         ▼
-Vercel rebuilds apps/web → Astro re-reads database at build time → redeploys to CDN
+Updates PORTFOLIO_KV binding with pre-built metadata JSON
         │
         ▼
-New content live, typically under 60 seconds
+apps/web on Cloudflare Workers reads PORTFOLIO_KV on request
+        │
+        ▼
+New content live instantly at the edge
 ```
 
 ## Options Considered
 
-### Option A: SSR (Render on every request)
+### Option A: SSR with Direct Database Queries
 - **Trade-off:** Visiting the site always hits the database. On free-tier databases (e.g. Supabase, Neon), a sleeping database will crash or freeze visitor page loads. Incurs high database read costs.
 - **Verdict:** Rejected.
 
-### Option B: Database Webhook → Vercel Deploy Hook (Chosen)
-- **Trade-off:** Small delay (~30–60s) between insert and live deployment.
-- **Benefits:** Visitors get 100% static HTML. Zero database load per visitor. If the database pauses, the site stays fully functional on the edge CDN.
-- **Verdict:** Accepted.
+### Option B: Database Webhook → Full Rebuilds (Vercel Deploy Hook)
+- **Trade-off:** 30–60 second build delays, burns build minutes, fragments deployment platforms.
+- **Verdict:** Superseded by Option C.
 
-### Option C: Client-side fetch on page load
-- **Trade-off:** Requires client-side JavaScript execution to view content, breaking SEO crawlability and cross-browser no-JS resilience.
-- **Verdict:** Rejected.
+### Option C: Cloudflare Workers + Shared Workers KV (`PORTFOLIO_KV`) (Chosen)
+- **Trade-off:** Eventual consistency across global KV nodes (typically propagates within seconds).
+- **Benefits:** Instant updates, zero database load per visitor, unified Cloudflare runtime, zero cold starts, generous free tier.
+- **Verdict:** Accepted.
 
 ---
 
@@ -125,12 +133,12 @@ apps/api  ──┘             │
 
 ## Loose Coupling Migration Plan
 
-| Component | Supabase Setup (Phase 1–5) | Neon / Generic Postgres Migration |
+| Component | Supabase Setup | Neon / Generic Postgres Migration |
 |---|---|---|
 | `packages/data-access` | Uses `@supabase/supabase-js` internally | Replace internals with `pg` or `@neondatabase/serverless`; keep exported function signatures identical |
-| `apps/web` | Calls `@portfolio/data-access` | Zero changes |
+| `apps/web` | Calls `@portfolio/data-access` or reads `PORTFOLIO_KV` | Zero changes |
 | `apps/api` | Calls `@portfolio/data-access` | Zero changes |
 | `packages/shared` | Pure Zod schemas & types | Zero changes |
 | Schema & SQL | Standard PostgreSQL DDL | Run identical SQL via `pg_dump`/`psql` |
-| Webhook / Deploy Hook | Supabase Database Webhook | Postgres trigger calling `pg_net` or scheduled GitHub Action/Vercel cron |
-| Caching | Static CDN (no Redis/CDC) | Static CDN (no Redis/CDC) |
+| Webhook / Sync Trigger | Supabase Database Webhook to `apps/api` | Postgres trigger calling `pg_net` or webhook targeting `apps/api` sync endpoint on Cloudflare Workers |
+| Caching | Cloudflare Workers KV (`PORTFOLIO_KV`) | Cloudflare Workers KV (`PORTFOLIO_KV`) |

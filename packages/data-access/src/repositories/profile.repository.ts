@@ -23,7 +23,7 @@ const STUB_SKILLS: Skill[] = [
   { name: "PostgreSQL", category: "Database", proficiency: 4, sortOrder: 7 },
   { name: "Supabase", category: "Database", proficiency: 4, sortOrder: 8 },
   { name: "Git & GitHub Actions", category: "DevOps", proficiency: 5, sortOrder: 9 },
-  { name: "Vercel", category: "DevOps", proficiency: 5, sortOrder: 10 },
+  { name: "Cloudflare Workers", category: "DevOps", proficiency: 5, sortOrder: 10 },
   { name: "System Design", category: "Architecture", proficiency: 4, sortOrder: 11 },
   { name: "Clean Architecture", category: "Architecture", proficiency: 5, sortOrder: 12 },
 ];

@@ -1,5 +1,6 @@
 ---
 import { getProfile, getProjects } from "@portfolio/data-access";
+import { sanitizeUrl } from "../utils/security";
 
 const profile = await getProfile();
 const projects = await getProjects();
@@ -11,12 +12,134 @@ const projects = await getProjects();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{profile.name} — {profile.role}</title>
+    <style>
+      :root {
+        --text: #1a202c;
+        --text-muted: #4a5568;
+        --bg: #ffffff;
+        --surface: #f7fafc;
+        --border: #e2e8f0;
+        --primary: #2b6cb0;
+        --badge-bg: #ebf8ff;
+        --badge-text: #2b6cb0;
+        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-sans);
+        color: var(--text);
+        background-color: var(--bg);
+        line-height: 1.6;
+        padding: 2.5rem 1.5rem;
+        max-width: 760px;
+        margin: 0 auto;
+      }
+
+      .env-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--badge-text);
+        background-color: var(--badge-bg);
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        border: 1px solid #bee3f8;
+        margin-bottom: 1.5rem;
+      }
+
+      header {
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 2rem;
+      }
+
+      h1 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        margin-bottom: 0.5rem;
+      }
+
+      .role {
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+      }
+
+      .bio {
+        font-size: 1rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        max-width: 65ch;
+      }
+
+      nav a {
+        display: inline-block;
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      nav a:hover {
+        text-decoration: underline;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
+        letter-spacing: -0.02em;
+      }
+
+      .project-list {
+        list-style: none;
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      .project-card {
+        padding: 1.25rem;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      .project-card strong {
+        display: block;
+        font-size: 1.125rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .project-card p {
+        font-size: 0.9375rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+      }
+
+      .project-card small {
+        font-size: 0.8125rem;
+        color: #718096;
+      }
+    </style>
   </head>
   <body>
+    <div class="env-badge">
+      <span>⚡</span>
+      <span>Hello World from Astro on Cloudflare Workers!</span>
+    </div>
+
     <header>
       <h1>{profile.name}</h1>
-      <p>{profile.role}</p>
-      <p>{profile.bio}</p>
+      <p class="role">{profile.role}</p>
+      <p class="bio">{profile.bio}</p>
       <nav>
         <a href="/resume">View Printable Resume →</a>
       </nav>
@@ -25,15 +148,33 @@ const projects = await getProjects();
     <main>
       <section>
         <h2>Featured Projects</h2>
-        <ul>
+        <ul class="project-list">
           {
-            projects.map((project) => (
-              <li>
-                <strong>{project.title}</strong>
-                <p>{project.description}</p>
-                <small>{project.techStack.join(" • ")}</small>
-              </li>
-            ))
+            projects.map((project) => {
+              const demo = sanitizeUrl(project.demoUrl);
+              const repo = sanitizeUrl(project.repoUrl);
+              return (
+                <li class="project-card">
+                  <strong>{project.title}</strong>
+                  <p>{project.description}</p>
+                  <small>{project.techStack.join(" • ")}</small>
+                  {(demo || repo) && (
+                    <div style="margin-top: 0.5rem; display: flex; gap: 1rem; font-size: 0.875rem;">
+                      {demo && (
+                        <a href={demo} target="_blank" rel="noopener noreferrer" style="color: var(--primary);">
+                          Live Demo →
+                        </a>
+                      )}
+                      {repo && (
+                        <a href={repo} target="_blank" rel="noopener noreferrer" style="color: var(--primary);">
+                          Source Code →
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })
           }
         </ul>
       </section>
