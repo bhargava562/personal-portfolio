@@ -1,6 +1,7 @@
 ---
 import { getProfile, getProjects } from "@portfolio/data-access";
 import { sanitizeUrl } from "../utils/security";
+import SEOHead from "../components/SEOHead.astro";
 
 const profile = await getProfile();
 const projects = await getProjects();
@@ -15,8 +16,10 @@ const safeEmail = sanitizeUrl(`mailto:${profile.email}`);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{profile.name} — {profile.role}</title>
-    <meta name="description" content={`${profile.name} — ${profile.headline}`} />
+    <SEOHead
+      title={`${profile.name} — ${profile.role}`}
+      description={`${profile.name} — ${profile.headline}`}
+    />
     <style>
       :root {
         --bg-canvas: #f8fafc;

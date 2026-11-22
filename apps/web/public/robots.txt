@@ -1,0 +1,28 @@
+# robots.txt for Bhargava A Portfolio (Traditional + AI Search Engines)
+User-agent: *
+Allow: /
+
+# Dedicated Permissions for Modern AI Retrieval & Answer Engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# XML Sitemap reference
+Sitemap: https://bhargavaa.dev/sitemap-index.xml

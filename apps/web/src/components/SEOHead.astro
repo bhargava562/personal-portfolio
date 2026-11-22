@@ -1,0 +1,121 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  ogType?: "website" | "profile" | "article";
+  jsonLd?: Record<string, unknown>;
+}
+
+const {
+  title = "Bhargava A — Backend, AI & Systems Software Engineer",
+  description = "Backend, AI & Systems-focused Software Engineering student. Building resilient backend services, multi-agent pipelines, and edge architectures with Java, Python, TypeScript, Spring Boot, FastAPI, and Astro.",
+  canonicalUrl,
+  ogImage = "/og-image.png",
+  ogType = "profile",
+  jsonLd,
+} = Astro.props;
+
+// Determine clean canonical URL without query parameters or hashes
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, "") : "https://bhargavaa.dev";
+const cleanPathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const resolvedCanonical = canonicalUrl || `${siteUrl}${cleanPathname === "/" ? "" : cleanPathname}`;
+const resolvedOgImage = ogImage.startsWith("http") ? ogImage : `${siteUrl}${ogImage.startsWith("/") ? ogImage : `/${ogImage}`}`;
+
+// Default High-Fidelity Schema.org ProfilePage + Person JSON-LD
+const defaultPersonSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "mainEntity": {
+    "@type": "Person",
+    "name": "Bhargava A",
+    "url": siteUrl,
+    "jobTitle": "Software Engineering Student & Backend / AI Developer",
+    "description": description,
+    "alumniOf": {
+      "@type": "CollegeOrUniversity",
+      "name": "R.M.K. Engineering College"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Chennai",
+      "addressRegion": "Tamil Nadu",
+      "addressCountry": "IN"
+    },
+    "knowsAbout": [
+      "Java",
+      "Spring Boot",
+      "Python",
+      "FastAPI",
+      "TypeScript",
+      "PostgreSQL",
+      "Cloudflare Workers",
+      "Astro",
+      "Hono",
+      "Multi-Agent AI Systems",
+      "Distributed Systems",
+      "Clean Architecture"
+    ],
+    "hasCredential": [
+      {
+        "@type": "EducationalOccupationalCredential",
+        "name": "Oracle Certified Professional: Java SE 21 Developer"
+      },
+      {
+        "@type": "EducationalOccupationalCredential",
+        "name": "Oracle AI Vector Search Professional"
+      },
+      {
+        "@type": "EducationalOccupationalCredential",
+        "name": "GitHub Foundations"
+      }
+    ],
+    "sameAs": [
+      "https://github.com/bhargava562",
+      "https://www.linkedin.com/in/bhargavaa1/",
+      "https://leetcode.com/u/Bhargava2525/",
+      "https://codeforces.com/profile/bhargava_a5",
+      "https://atcoder.jp/users/bhargavaa1",
+      "https://www.hackerrank.com/profile/Bhargava_A_056/",
+      "https://codolio.com/profile/bhargavA45"
+    ]
+  }
+};
+
+const activeJsonLd = jsonLd || defaultPersonSchema;
+
+// XSS-safe serialization for embedded JSON-LD scripts
+const serializedJsonLd = JSON.stringify(activeJsonLd).replace(/</g, "\\u003c");
+---
+
+<!-- Core Standard Meta Tags -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={resolvedCanonical} />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+<!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+<meta property="og:site_name" content="Bhargava A" />
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={resolvedCanonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={resolvedOgImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content="en_US" />
+
+<!-- Twitter / X Cards -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={resolvedCanonical} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={resolvedOgImage} />
+
+<!-- Favicon Links -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="alternate icon" type="image/x-icon" href="/favicon.ico" />
+
+<!-- Sanitized JSON-LD Structured Data for Google Knowledge Graph & AI Engines -->
+<script type="application/ld+json" set:html={serializedJsonLd} />

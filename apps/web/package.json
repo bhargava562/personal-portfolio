@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.13",
     "@astrojs/preact": "^4.1.0",
+    "@astrojs/sitemap": "^3.7.6",
     "@portfolio/data-access": "workspace:*",
     "@portfolio/shared": "workspace:*",
     "astro": "^5.9.4",

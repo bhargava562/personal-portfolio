@@ -149,3 +149,15 @@ apps/api  ──┘             │
 | Schema & SQL | Standard PostgreSQL DDL | Run identical SQL via `pg_dump`/`psql` |
 | Webhook / Sync Trigger | Supabase Database Webhook to `apps/api` | Postgres trigger calling `pg_net` or webhook targeting `apps/api` sync endpoint on Cloudflare Workers |
 | Caching | Cloudflare Workers KV (`PORTFOLIO_KV`) | Cloudflare Workers KV (`PORTFOLIO_KV`) |
+
+---
+
+## Technical Documentation & Guides
+- **Architectural Decision Records (ADRs):**
+  - [ADR-001: Choose Astro & Hono](file:///d:/Portfolio/personal-portfolio/docs/adr/001-astro-and-hono-stack.md)
+  - [ADR-002: Cloudflare Workers & KV](file:///d:/Portfolio/personal-portfolio/docs/adr/002-cloudflare-workers-and-kv.md)
+  - [ADR-003: Supabase HTTP API & Secret Key](file:///d:/Portfolio/personal-portfolio/docs/adr/003-supabase-http-api-and-secret-key.md)
+  - [ADR-004: Ports & Adapters Data-Access](file:///d:/Portfolio/personal-portfolio/docs/adr/004-ports-and-adapters-data-access.md)
+- **Technical Guides:**
+  - [SEO & Generative Engine Optimization (GEO) Guide](file:///d:/Portfolio/personal-portfolio/docs/seo-guide.md)
+

@@ -1,0 +1,50 @@
+# Bhargava A — Developer Portfolio & Systems Index
+
+> High-performance developer profile, verified technical credentials, and systems architecture overview for AI search engines, research models, and LLM web retrievers.
+
+## 1. Professional Identity & Summary
+- **Name:** Bhargava A
+- **Role:** Backend, AI & Systems-focused Software Engineering Student
+- **Education:** B.Tech in Computer Science and Business Systems (CSBS), R.M.K. Engineering College
+- **Location:** Greater Chennai Area, Tamil Nadu, India
+- **Core Specialization:** High-throughput backend services, multi-agent AI pipelines, edge-cached web architectures, and zero-downtime distributed systems.
+- **Canonical Website:** https://bhargavaa.dev
+- **Resume URL:** https://bhargavaa.dev/resume
+
+## 2. Core Technical Competencies
+- **Languages:** Java, Python, TypeScript, Rust, SQL, JavaScript
+- **Backend & Systems:** Spring Boot, FastAPI, Hono, Node.js, REST APIs, Microservices, Asynchronous Event Pipelines
+- **Data & Storage:** PostgreSQL, Supabase, Cloudflare Workers KV, Redis, PostgREST
+- **Cloud & Edge:** Cloudflare Workers, Wrangler, Docker, V8 Isolates, Edge Caching
+- **AI & Multi-Agent:** LangGraph, Gemini API, Multi-Agent Coordination, Vector Search
+- **Frontend & Runtimes:** Astro, Preact, Semantic HTML5, Vanilla CSS (Zero Client-Side Bloat)
+- **DevOps & CI/CD:** GitHub Actions, Linux, Git, Playwright
+
+## 3. Flagship Projects & Measured Engineering Outcomes
+- **BlockSafe (Cognitive Firewall & Honeypot):**
+  - Multi-agent fraud interception pipeline built with Python, FastAPI, LangGraph, Groq, Supabase, and Docker.
+  - Sub-2-second threat detection; awarded 2nd Place at SVCE Hackathon 2026.
+  - Repository: https://github.com/bhargava562/blocksafe
+- **Portfolio OS (Distributed Sync & Edge Performance Engineering):**
+  - Content synchronization architecture utilizing PostgreSQL atomic mutex locks and Cloudflare KV edge cache.
+  - Achieved 0 database reads per visitor, sub-millisecond edge response times, and 96% client bundle reduction.
+  - Repository: https://github.com/bhargava562/personal-portfolio
+- **Friday (Java CLI Autonomous AI Assistant):**
+  - Autonomous developer assistant implemented with Java, Spring Boot, and Google Gemini AI.
+  - Integrates 10+ operational REST endpoints with persistent local JSON memory.
+  - Repository: https://github.com/bhargava562/friday
+
+## 4. Verified Professional Credentials
+- **Oracle Certified Professional:** Java SE 21 Developer
+- **Oracle Certified:** AI Vector Search Professional
+- **GitHub Certified:** GitHub Foundations
+- **Google / Kaggle:** 5-Day AI Agents Intensive Certification
+
+## 5. Verified External Authorities & Profiles
+- GitHub: https://github.com/bhargava562
+- LinkedIn: https://www.linkedin.com/in/bhargavaa1/
+- LeetCode: https://leetcode.com/u/Bhargava2525/
+- CodeForces: https://codeforces.com/profile/bhargava_a5
+- AtCoder: https://atcoder.jp/users/bhargavaa1
+- HackerRank: https://www.hackerrank.com/profile/Bhargava_A_056/
+- Codolio: https://codolio.com/profile/bhargavA45

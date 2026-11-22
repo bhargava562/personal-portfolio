@@ -1,6 +1,7 @@
 ---
 import { getResumeData } from "@portfolio/data-access";
 import { sanitizeUrl } from "../utils/security";
+import SEOHead from "../components/SEOHead.astro";
 import "../styles/resume.css";
 
 const resume = await getResumeData();
@@ -25,8 +26,11 @@ const skillsByCategory = categories
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={`Resume of ${profile.name} — ${profile.role}`} />
-    <title>{profile.name} — Resume</title>
+    <SEOHead
+      title={`${profile.name} — Resume`}
+      description={`Resume, credentials, technical proficiencies, and experience of ${profile.name} — ${profile.role}.`}
+      ogType="profile"
+    />
   </head>
   <body class="resume-body">
     <!-- Screen navigation and print trigger (hidden on print) -->
