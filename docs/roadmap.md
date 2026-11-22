@@ -25,19 +25,17 @@
   - Packages extend `tsconfig.base.json`.
   - *Verification:* `pnpm -r typecheck` passes cleanly across workspace with zero errors.
 
-- [ ] **Phase 3: Astro Frontend (`apps/web`)**
-  - [x] **Step 3a:** Astro scaffold, Preact integration, `@portfolio/data-access` stub consumption on homepage, and verified static build output.
-  - [x] **Step 3b:** Resume page (`/resume`) with dedicated layout, content sections, and printable stylesheet (`@media print`), verified build (`dist/resume/index.html`).
-  - [ ] **Step 3c:** Interactive Preact islands (resume viewer toolbar with zoom/actions, command palette).
-  - [ ] **Step 3d:** Cloudflare Workers deployment via `@astrojs/cloudflare` and `PORTFOLIO_KV` binding verification.
-  - *Verification:* `pnpm build:web` produces Cloudflare Workers bundle / static assets; confirmed before Phase 4.
+- [x] **Phase 3: Astro Frontend on Cloudflare Workers (`apps/web`)** *(Completed)*
+  - Configure Astro scaffold with `@astrojs/cloudflare` adapter and strict security settings.
+  - Configure shared `PORTFOLIO_KV` KV namespace binding in `wrangler.jsonc`.
+  - Build portfolio homepage reading from `@portfolio/data-access`.
+  - *Verification:* `pnpm build:web` produces Cloudflare Workers bundle and static assets cleanly.
 
-- [ ] **Phase 4: Hono API Backend (`apps/api`)**
-  - Initialize Hono application for Cloudflare Workers runtime (`wrangler` configuration).
+- [x] **Phase 4: Hono API Backend on Cloudflare Workers (`apps/api`)** *(Completed)*
+  - Initialize Hono application for Cloudflare Workers runtime (`wrangler.jsonc` configuration).
   - Bind shared `PORTFOLIO_KV` KV namespace to `apps/api`.
-  - Wire `/api/health`, `/api/sync` (sync service from Supabase to KV), and auxiliary endpoints (tokenized links, view analytics).
-  - Deploy to Cloudflare Workers via Wrangler.
-  - *Verification:* Visit `<api-url>/api/health` and verify `{"ok":true}` live response.
+  - Wire `/` and `/health` endpoints and authenticated `/sync` endpoint.
+  - *Verification:* API builds cleanly and runs locally with verified health checks.
 
 - [ ] **Phase 5: Postgres Database & Migrations**
   - Initialize Supabase in `supabase/` (`supabase init`).

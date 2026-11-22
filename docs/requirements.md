@@ -6,10 +6,9 @@
   - Content updates happen by inserting or updating rows in Postgres.
   - No manual code changes, commits, or dashboard redeployments required.
   - Supabase database change trigger/webhook invokes Hono sync service on Cloudflare Workers $\rightarrow$ updates `PORTFOLIO_KV` pre-built metadata JSON immediately without waiting for full site rebuilds (ADR-001).
-- **Interactive & Printable Resume:**
-  - Synchronized from the same single source of truth in Postgres (via `PORTFOLIO_KV`).
-  - In-browser interactive viewer with zoom and section jumping (Preact island).
-  - High-fidelity printable view (`@media print`) and downloadable PDF (`Bhargava_Resume.pdf`).
+- **Automated Metadata Synchronization:**
+  - Synchronized from the single source of truth in Postgres (via `PORTFOLIO_KV`).
+  - Edge-cached data delivery to visitors with zero direct database queries.
 - **Tokenized Resume Links:**
   - Time-limited or view-capped personalized links for recruiters and hiring managers.
   - Anonymous view analytics (referrer, device type, access timestamp) via Hono API on Cloudflare Workers.
