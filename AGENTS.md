@@ -55,3 +55,26 @@
 
 ## Source of truth
 - This repository's `docs/` folder is authoritative over any prior chat explanation.
+
+## Database Rollout & SQL Writing Rules
+
+### Rollout Strategy (One Table at a Time)
+- **Target Model (Option B):** Pragmatic relational tables with `text[]` arrays where appropriate; text and URLs only first, with images/icons deferred.
+- **Incremental Execution:** Roll out **one table at a time**, seed/insert real data right away, and verify it live in Supabase before moving to the next table. Always pause for user validation before starting the next table.
+- **GitHub vs. Postgres Execution:** Pushing `.sql` files to GitHub does **not** execute SQL or commit rows into Supabase. SQL executes against Postgres via the Supabase SQL Editor, CLI, or client.
+
+### Mandatory SQL Query Writing Format
+1. **One Table Per Step:** Never create or modify multiple unrelated tables in a single step unless explicitly instructed. Roll out one table, verify it with real data, and wait for confirmation before starting the next.
+2. **Strict Separation of Schema vs. Data:**
+   - Put **DDL only** (`CREATE TABLE`, `ALTER TABLE`, `CREATE INDEX`, `ENABLE ROW LEVEL SECURITY`, `REVOKE ALL`) in numbered migration files under `supabase/migrations/` (e.g., `0001_create_profile.sql`).
+   - Keep **DML** (`INSERT INTO`, `UPDATE`) separate from schema migration files so content changes do not pollute schema history (and use repeatable/idempotent scripts when saved in the repo).
+3. **Mandatory Security Defaults on Every New Table:**
+   - Every new table in `public` must explicitly enable Row Level Security (`ALTER TABLE public.<table> ENABLE ROW LEVEL SECURITY;`) and revoke default privileges from `anon` and `authenticated` (`REVOKE ALL ON TABLE public.<table> FROM anon, authenticated;`) in the same migration that creates the table.
+4. **Transactions on Multi-Statement / Multi-Row Writes:**
+   - Wrap multi-statement migrations or multi-row `INSERT`/`UPDATE` batches in `BEGIN;` ... `COMMIT;` (with clear constraint checks and `ON CONFLICT` / idempotent handling where applicable) so partial failures roll back cleanly.
+5. **Parent-First Foreign Keys & Safe Types:**
+   - Use `uuid` primary keys (`default gen_random_uuid()`), lowercase `snake_case` table/column names, `timestamptz` for timestamps, `date` for calendar dates, and `text[]` for simple list fields (such as `tech_stack` or `highlights`).
+   - Any child table referencing `profile` must declare `profile_id uuid NOT NULL REFERENCES public.profile(id) ON DELETE CASCADE` and only insert rows pointing to an existing `profile.id`.
+6. **Public-Safe (`L0`) & Plain-English Walkthrough:**
+   - Only include public-safe (`L0`) portfolio data—never internal notes, drafts, or confidential details.
+   - For every SQL query provided, briefly explain *why* each clause/transaction is there so the user can easily validate it before executing.
