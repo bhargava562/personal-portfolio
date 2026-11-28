@@ -2,6 +2,7 @@
 import { getProfile, getProjects } from "@portfolio/data-access";
 import { sanitizeUrl } from "../utils/security";
 import SEOHead from "../components/SEOHead.astro";
+import IcebergIntro from "../components/intro/IcebergIntro.astro";
 
 const profile = await getProfile();
 const projects = await getProjects();
@@ -16,6 +17,15 @@ const safeEmail = sanitizeUrl(`mailto:${profile.email}`);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline>
+      try {
+        if (window.sessionStorage.getItem("portfolio_intro_seen") === "1") {
+          document.documentElement.classList.add("intro-seen");
+        }
+      } catch (_e) {
+        // Ignore storage access errors in restricted environments
+      }
+    </script>
     <SEOHead
       title={`${profile.name} — ${profile.role}`}
       description={`${profile.name} — ${profile.headline}`}
@@ -41,6 +51,10 @@ const safeEmail = sanitizeUrl(`mailto:${profile.email}`);
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
       }
 
       body {
@@ -281,6 +295,10 @@ const safeEmail = sanitizeUrl(`mailto:${profile.email}`);
       }
 
       @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
         * {
           transition: none !important;
         }
@@ -288,6 +306,7 @@ const safeEmail = sanitizeUrl(`mailto:${profile.email}`);
     </style>
   </head>
   <body>
+    <IcebergIntro />
     <a href="#main-content" class="skip-link">Skip to content</a>
 
     <div class="container">

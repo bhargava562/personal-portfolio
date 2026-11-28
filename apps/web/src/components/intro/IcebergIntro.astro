@@ -1,0 +1,53 @@
+---
+import "../../styles/intro.css";
+---
+
+<div
+  id="iceberg-intro"
+  class="iceberg-intro"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Portfolio intro"
+>
+  <img
+    id="iceberg-img"
+    class="iceberg-img"
+    src="/iceberg.png"
+    alt=""
+    decoding="async"
+    fetchpriority="high"
+  />
+  <div class="iceberg-scrim iceberg-scrim--top" aria-hidden="true"></div>
+  <div class="iceberg-scrim iceberg-scrim--bottom" aria-hidden="true"></div>
+
+  <div class="iceberg-copy">
+    <p id="iceberg-line-1" class="iceberg-line iceberg-line--1" aria-live="polite"></p>
+    <p id="iceberg-line-2" class="iceberg-line iceberg-line--2" aria-live="polite"></p>
+  </div>
+
+  <button
+    id="iceberg-skip"
+    class="iceberg-skip"
+    type="button"
+    aria-label="Skip intro"
+  >
+    Skip
+  </button>
+</div>
+
+<script>
+  import { initIcebergIntro } from "../../scripts/introAnimation";
+
+  let cleanup: (() => void) | undefined;
+
+  const mountIntro = () => {
+    cleanup?.();
+    cleanup = initIcebergIntro();
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountIntro, { once: true });
+  } else {
+    mountIntro();
+  }
+</script>

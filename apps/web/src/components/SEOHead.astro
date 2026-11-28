@@ -117,5 +117,13 @@ const serializedJsonLd = JSON.stringify(activeJsonLd).replace(/</g, "\\u003c");
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="alternate icon" type="image/x-icon" href="/favicon.ico" />
 
+<!-- Google Fonts: Exo 2 -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap"
+  rel="stylesheet"
+/>
+
 <!-- Sanitized JSON-LD Structured Data for Google Knowledge Graph & AI Engines -->
 <script type="application/ld+json" set:html={serializedJsonLd} />

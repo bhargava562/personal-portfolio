@@ -1,0 +1,197 @@
+/* Beneath the Surface — Full-bleed Iceberg Intro Overlay */
+
+html.intro-seen #iceberg-intro {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.iceberg-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  padding:
+    max(20px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+  background: #030a14;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+  font-family: "Exo 2", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.iceberg-intro.is-exiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.iceberg-intro.is-dismissed {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.iceberg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  max-width: none;
+  border: 0;
+  outline: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+  transform-origin: 0 0;
+  transform: translate3d(0, 0, 0);
+  opacity: 0;
+  transition: opacity 0.45s ease-out;
+}
+
+.iceberg-intro.is-active .iceberg-img {
+  opacity: 1;
+}
+
+.iceberg-scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.iceberg-scrim--top {
+  top: 0;
+  height: 58%;
+  background: linear-gradient(
+    to bottom,
+    rgba(3, 9, 18, 0.78) 0%,
+    rgba(3, 9, 18, 0.36) 55%,
+    transparent 100%
+  );
+}
+
+.iceberg-scrim--bottom {
+  bottom: 0;
+  height: 62%;
+  background: linear-gradient(
+    to top,
+    rgba(2, 7, 16, 0.86) 0%,
+    rgba(2, 7, 16, 0.42) 60%,
+    transparent 100%
+  );
+}
+
+.iceberg-copy {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.iceberg-line {
+  position: absolute;
+  left: 50%;
+  margin: 0;
+  width: min(92%, 28ch);
+  padding-inline: 0.5rem;
+  text-align: center;
+  font-family: "Exo 2", system-ui, -apple-system, sans-serif;
+  font-size: clamp(1.35rem, 3.2vw, 3.25rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  opacity: 0;
+  transform: translate3d(-50%, 8px, 0);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.iceberg-line--1 {
+  top: clamp(14%, 18svh, 24%);
+  color: #f8fafc;
+  text-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.9),
+    0 1px 4px rgba(0, 0, 0, 0.98);
+}
+
+.iceberg-line--2 {
+  bottom: clamp(18%, 22svh, 28%);
+  color: #f1f5f9;
+  text-shadow:
+    0 2px 18px rgba(1, 5, 13, 0.95),
+    0 0 24px rgba(56, 189, 248, 0.25);
+  transition:
+    opacity 0.2s ease,
+    transform 0.25s ease;
+}
+
+.iceberg-intro.is-line1-visible .iceberg-line--1 {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0);
+}
+
+.iceberg-intro.is-line2-visible .iceberg-line--2 {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0);
+}
+
+.iceberg-skip {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.05rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(248, 250, 252, 0.24);
+  background: rgba(3, 10, 20, 0.72);
+  color: #f8fafc;
+  font-family: "Exo 2", system-ui, -apple-system, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.iceberg-skip:hover {
+  background: rgba(15, 23, 42, 0.88);
+  border-color: rgba(248, 250, 252, 0.45);
+}
+
+.iceberg-skip:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iceberg-intro,
+  .iceberg-img,
+  .iceberg-line,
+  .iceberg-skip {
+    transition: none !important;
+  }
+
+  .iceberg-line {
+    transform: translate3d(-50%, 0, 0) !important;
+  }
+}
