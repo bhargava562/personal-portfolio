@@ -2,28 +2,28 @@ const FALLBACK_IMG_WIDTH = 1011;
 const FALLBACK_IMG_HEIGHT = 681;
 
 const WATERLINE_RATIO = 0.435;
-const UNDERWATER_FOCAL_RATIO = 0.68;
-const VIEWPORT_START_RATIO = 0.72;
-const VIEWPORT_END_RATIO = 0.45;
+const UNDERWATER_FOCAL_RATIO = 0.78;
+const VIEWPORT_START_RATIO = 0.78;
+const VIEWPORT_END_RATIO = 0.40;
 
 const OVERSCAN_SCALE = 1.08;
-const LANDSCAPE_MIN_HEIGHT_MULT = 1.25;
-const PORTRAIT_HEIGHT_MULT = 1.65;
-const LANDSCAPE_ZOOM_END = 1.42;
-const PORTRAIT_ZOOM_END = 1.48;
+const LANDSCAPE_MIN_HEIGHT_MULT = 1.95;
+const PORTRAIT_HEIGHT_MULT = 2.15;
+const LANDSCAPE_ZOOM_END = 1.15;
+const PORTRAIT_ZOOM_END = 1.18;
+const EDGE_BLEED_PX = 4;
+const RESIZE_DEBOUNCE_MS = 150;
 
 const SESSION_KEY = "portfolio_intro_seen";
 const LINE_1_TEXT = "You didn't land here by accident.";
 const LINE_2_TEXT = "The real story lies beneath the surface.";
 
-// Strictly <= 5000ms timeline (milliseconds)
-const T_LINE1_START = 100;
-const T_LINE1_TYPING_END = 1450;
-const T_DESCENT_START = 1550;
-const T_LINE1_HIDE = 1750;
-const T_LINE2_START = 2050;
-const T_DESCENT_END = 3200;
-const T_LINE2_TYPING_END = 3400;
+// Strictly <= 5000ms compositor-only timeline (milliseconds)
+const T_LINE1_SHOW = 150;
+const T_DESCENT_START = 1450;
+const T_LINE1_HIDE = 1450;
+const T_DESCENT_END = 3150;
+const T_LINE2_SHOW = 3050;
 const T_EXIT_START = 4350;
 const T_COMPLETE = 4950;
 
@@ -34,6 +34,8 @@ const REDUCED_COMPLETE = 1000;
 interface GeometryMetrics {
   vpWidth: number;
   vpHeight: number;
+  imgWidth: number;
+  imgHeight: number;
   baseWidth: number;
   baseHeight: number;
   zoomEnd: number;
@@ -52,8 +54,8 @@ function easeOutCubic(t: number): number {
 
 function getViewportSize(): { width: number; height: number } {
   const vv = window.visualViewport;
-  const width = Math.max(1, vv ? vv.width : window.innerWidth);
-  const height = Math.max(1, vv ? vv.height : window.innerHeight);
+  const width = Math.max(1, Math.round(vv ? vv.width : window.innerWidth));
+  const height = Math.max(1, Math.round(vv ? vv.height : window.innerHeight));
   return { width, height };
 }
 
@@ -90,18 +92,22 @@ function computeGeometry(
 
   const zoomEnd = isLandscape ? LANDSCAPE_ZOOM_END : PORTRAIT_ZOOM_END;
 
-  const minYStart = Math.min(0, vpHeight - baseHeight);
+  const minYStart = Math.min(-EDGE_BLEED_PX, vpHeight - baseHeight + EDGE_BLEED_PX);
+  const maxYStart = -EDGE_BLEED_PX;
   const rawStart = VIEWPORT_START_RATIO * vpHeight - WATERLINE_RATIO * baseHeight;
-  const yStart = clamp(rawStart, minYStart, 0);
+  const yStart = clamp(rawStart, minYStart, maxYStart);
 
   const zoomedHeight = baseHeight * zoomEnd;
-  const minYEnd = Math.min(0, vpHeight - zoomedHeight);
+  const minYEnd = Math.min(-EDGE_BLEED_PX, vpHeight - zoomedHeight + EDGE_BLEED_PX);
+  const maxYEnd = -EDGE_BLEED_PX;
   const rawEnd = VIEWPORT_END_RATIO * vpHeight - UNDERWATER_FOCAL_RATIO * zoomedHeight;
-  const yEnd = clamp(rawEnd, minYEnd, 0);
+  const yEnd = clamp(rawEnd, minYEnd, maxYEnd);
 
   return {
     vpWidth,
     vpHeight,
+    imgWidth,
+    imgHeight,
     baseWidth,
     baseHeight,
     zoomEnd,
@@ -130,8 +136,7 @@ function focusMainContent(): void {
   const main = document.getElementById("main-content");
   if (!main) return;
 
-  const hadTabIndex = main.hasAttribute("tabindex");
-  if (!hadTabIndex) {
+  if (!main.hasAttribute("tabindex")) {
     main.setAttribute("tabindex", "-1");
   }
   main.focus({ preventScroll: true });
@@ -157,6 +162,7 @@ export function initIcebergIntro(): () => void {
 
   let cleanedUp = false;
   let rafId: number | null = null;
+  let resizeDebounceId: number | null = null;
   const timeoutIds = new Set<number>();
   let resizeObserver: ResizeObserver | null = null;
 
@@ -200,8 +206,8 @@ export function initIcebergIntro(): () => void {
   let currentZoom = 1;
 
   const applyTransform = (y: number, zoom: number, metrics: GeometryMetrics): void => {
-    const minY = Math.min(0, metrics.vpHeight - metrics.baseHeight * zoom);
-    const clampedY = clamp(y, minY, 0);
+    const minY = Math.min(-EDGE_BLEED_PX, metrics.vpHeight - metrics.baseHeight * zoom + EDGE_BLEED_PX);
+    const clampedY = clamp(y, minY, -EDGE_BLEED_PX);
     const xCentered = (metrics.vpWidth - metrics.baseWidth * zoom) / 2;
 
     currentY = clampedY;
@@ -243,6 +249,16 @@ export function initIcebergIntro(): () => void {
     if (cleanedUp) return;
     const { width, height } = getViewportSize();
     const { imgWidth, imgHeight } = getImageNaturalSize(img);
+
+    if (
+      width === currentGeometry.vpWidth &&
+      height === currentGeometry.vpHeight &&
+      imgWidth === currentGeometry.imgWidth &&
+      imgHeight === currentGeometry.imgHeight
+    ) {
+      return;
+    }
+
     currentGeometry = computeGeometry(width, height, imgWidth, imgHeight);
     applyGeometrySize(currentGeometry);
     const pose = computePoseForElapsed(getCurrentElapsed(), currentGeometry);
@@ -250,6 +266,17 @@ export function initIcebergIntro(): () => void {
   };
 
   const onViewportChange = (): void => {
+    if (cleanedUp) return;
+    if (resizeDebounceId !== null) {
+      window.clearTimeout(resizeDebounceId);
+    }
+    resizeDebounceId = window.setTimeout(() => {
+      resizeDebounceId = null;
+      recalculate();
+    }, RESIZE_DEBOUNCE_MS);
+  };
+
+  const onImageLoad = (): void => {
     recalculate();
   };
 
@@ -272,6 +299,10 @@ export function initIcebergIntro(): () => void {
       cancelAnimationFrame(rafId);
       rafId = null;
     }
+    if (resizeDebounceId !== null) {
+      window.clearTimeout(resizeDebounceId);
+      resizeDebounceId = null;
+    }
 
     for (const id of timeoutIds) {
       window.clearTimeout(id);
@@ -286,9 +317,12 @@ export function initIcebergIntro(): () => void {
     window.removeEventListener("resize", onViewportChange);
     window.removeEventListener("orientationchange", onViewportChange);
     window.visualViewport?.removeEventListener("resize", onViewportChange);
-    img.removeEventListener("load", onViewportChange);
+    img.removeEventListener("load", onImageLoad);
     document.removeEventListener("keydown", onKeyDown);
     skipBtn?.removeEventListener("click", onSkipClick);
+
+    img.style.willChange = "auto";
+    root.style.willChange = "auto";
 
     unlockScroll();
   };
@@ -308,14 +342,15 @@ export function initIcebergIntro(): () => void {
     }
   };
 
+  // Set both lines once (smooth GPU-composited opacity + translate3d reveals, zero per-char mutations)
+  line1El.textContent = LINE_1_TEXT;
+  line2El.textContent = LINE_2_TEXT;
+
   // Initialize DOM state & geometry
   lockScroll();
   root.classList.remove("is-dismissed", "is-exiting", "is-line1-visible", "is-line2-visible");
   root.classList.add("is-active");
   root.removeAttribute("aria-hidden");
-
-  line1El.textContent = "";
-  line2El.textContent = "";
 
   applyGeometrySize(currentGeometry);
   if (reducedMotion) {
@@ -324,7 +359,7 @@ export function initIcebergIntro(): () => void {
     applyTransform(currentGeometry.yStart, 1, currentGeometry);
   }
 
-  // Attach listeners & observers
+  // Attach listeners & debounced observers
   if (typeof ResizeObserver !== "undefined") {
     resizeObserver = new ResizeObserver(onViewportChange);
     resizeObserver.observe(root);
@@ -333,13 +368,12 @@ export function initIcebergIntro(): () => void {
   window.addEventListener("orientationchange", onViewportChange, { passive: true });
   window.visualViewport?.addEventListener("resize", onViewportChange, { passive: true });
   if (!img.complete) {
-    img.addEventListener("load", onViewportChange, { once: true });
+    img.addEventListener("load", onImageLoad, { once: true });
   }
   document.addEventListener("keydown", onKeyDown);
   skipBtn?.addEventListener("click", onSkipClick);
 
   if (reducedMotion) {
-    line2El.textContent = LINE_2_TEXT;
     root.classList.add("is-line2-visible");
 
     scheduleTimeout(() => {
@@ -353,14 +387,10 @@ export function initIcebergIntro(): () => void {
     return cleanup;
   }
 
-  let line1Started = false;
-  let line1Completed = false;
+  let line1Shown = false;
   let line1Hidden = false;
-  let line2Started = false;
-  let line2Completed = false;
+  let line2Shown = false;
   let exitStarted = false;
-  let lastLine1Len = -1;
-  let lastLine2Len = -1;
 
   const tick = (now: number): void => {
     if (cleanedUp) return;
@@ -370,37 +400,16 @@ export function initIcebergIntro(): () => void {
 
     const elapsed = now - startTime;
 
-    // 100ms - 1450ms: Even character-by-character typing for Line 1 (~40ms/char)
-    if (elapsed >= T_LINE1_START && !line1Started) {
-      line1Started = true;
+    if (elapsed >= T_LINE1_SHOW && !line1Shown) {
+      line1Shown = true;
       root.classList.add("is-line1-visible");
     }
 
-    if (elapsed >= T_LINE1_START && !line1Completed) {
-      const typingDuration = T_LINE1_TYPING_END - T_LINE1_START;
-      const progress = clamp((elapsed - T_LINE1_START) / typingDuration, 0, 1);
-      const charCount = Math.floor(progress * LINE_1_TEXT.length);
-      if (charCount !== lastLine1Len) {
-        lastLine1Len = charCount;
-        line1El.textContent = LINE_1_TEXT.slice(0, charCount);
-      }
-      if (progress >= 1) {
-        line1Completed = true;
-        line1El.textContent = LINE_1_TEXT;
-      }
-    }
-
-    // 1750ms - 2050ms: Fade out Line 1
     if (elapsed >= T_LINE1_HIDE && !line1Hidden) {
       line1Hidden = true;
-      if (!line1Completed) {
-        line1Completed = true;
-        line1El.textContent = LINE_1_TEXT;
-      }
       root.classList.remove("is-line1-visible");
     }
 
-    // 1550ms - 3200ms: Smooth cubic-out descent + progressive zoom-in
     if (elapsed >= T_DESCENT_START && elapsed <= T_DESCENT_END) {
       const pose = computePoseForElapsed(elapsed, currentGeometry);
       if (
@@ -417,27 +426,11 @@ export function initIcebergIntro(): () => void {
       applyTransform(currentGeometry.yEnd, currentGeometry.zoomEnd, currentGeometry);
     }
 
-    // 2050ms - 3400ms: Even character-by-character typing for Line 2 (~34ms/char)
-    if (elapsed >= T_LINE2_START && !line2Started) {
-      line2Started = true;
+    if (elapsed >= T_LINE2_SHOW && !line2Shown) {
+      line2Shown = true;
       root.classList.add("is-line2-visible");
     }
 
-    if (elapsed >= T_LINE2_START && !line2Completed) {
-      const typingDuration = T_LINE2_TYPING_END - T_LINE2_START;
-      const progress = clamp((elapsed - T_LINE2_START) / typingDuration, 0, 1);
-      const charCount = Math.floor(progress * LINE_2_TEXT.length);
-      if (charCount !== lastLine2Len) {
-        lastLine2Len = charCount;
-        line2El.textContent = LINE_2_TEXT.slice(0, charCount);
-      }
-      if (progress >= 1) {
-        line2Completed = true;
-        line2El.textContent = LINE_2_TEXT;
-      }
-    }
-
-    // 4350ms - 4950ms: Dissolve overlay cleanly (never before 4350ms)
     if (elapsed >= T_EXIT_START && !exitStarted) {
       exitStarted = true;
       root.classList.add("is-exiting");

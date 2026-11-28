@@ -14,6 +14,7 @@ html.intro-seen #iceberg-intro {
   width: 100%;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   overflow: hidden;
   padding:
     max(20px, env(safe-area-inset-top))
@@ -27,6 +28,10 @@ html.intro-seen #iceberg-intro {
   -webkit-font-smoothing: antialiased;
 }
 
+.iceberg-intro.is-active {
+  will-change: opacity;
+}
+
 .iceberg-intro.is-exiting {
   opacity: 0;
   pointer-events: none;
@@ -36,6 +41,7 @@ html.intro-seen #iceberg-intro {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
+  will-change: auto !important;
 }
 
 .iceberg-img {
@@ -49,15 +55,19 @@ html.intro-seen #iceberg-intro {
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
-  will-change: transform;
   transform-origin: 0 0;
   transform: translate3d(0, 0, 0);
-  opacity: 0;
-  transition: opacity 0.45s ease-out;
+  opacity: 1;
 }
 
 .iceberg-intro.is-active .iceberg-img {
   opacity: 1;
+  will-change: transform, opacity;
+}
+
+.iceberg-intro.is-dismissed .iceberg-img,
+.iceberg-intro.is-dismissed .iceberg-line {
+  will-change: auto;
 }
 
 .iceberg-scrim {
@@ -113,8 +123,8 @@ html.intro-seen #iceberg-intro {
   opacity: 0;
   transform: translate3d(-50%, 8px, 0);
   transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .iceberg-line--1 {
@@ -131,19 +141,18 @@ html.intro-seen #iceberg-intro {
   text-shadow:
     0 2px 18px rgba(1, 5, 13, 0.95),
     0 0 24px rgba(56, 189, 248, 0.25);
-  transition:
-    opacity 0.2s ease,
-    transform 0.25s ease;
 }
 
 .iceberg-intro.is-line1-visible .iceberg-line--1 {
   opacity: 1;
   transform: translate3d(-50%, 0, 0);
+  will-change: transform, opacity;
 }
 
 .iceberg-intro.is-line2-visible .iceberg-line--2 {
   opacity: 1;
   transform: translate3d(-50%, 0, 0);
+  will-change: transform, opacity;
 }
 
 .iceberg-skip {
@@ -187,6 +196,7 @@ html.intro-seen #iceberg-intro {
   .iceberg-intro,
   .iceberg-img,
   .iceberg-line,
+  .iceberg-char,
   .iceberg-skip {
     transition: none !important;
   }
